@@ -149,7 +149,7 @@ def asm(executable: list):
                     executable[nb_line] |= const[token]
                 elif token in labels:
                     executable[nb_line] |= labels[token]
-                elif token.startswith("r" or "R"):
+                elif token.startswith(("r", "R")):
                     executable[nb_line] |= get_reg(pos_token, token.strip(","))
                 elif token.startswith("#"):
                     executable[nb_line] |= int(token[1:])
