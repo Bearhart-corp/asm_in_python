@@ -1,0 +1,102 @@
+ASSEMBLEUR – IDEES D'AMELIORATIONS SIMPLES MAIS PUISSANTES
+
+1. MACROS PARAMETREES
+   Permettre de définir des blocs de code réutilisables.
+
+Exemple :
+
+macro push2 a b
+push a
+push b
+end
+
+push2 r1 r2
+
+Le préprocesseur remplace l'appel par le contenu de la macro.
+Implémentation simple : stocker les tokens et remplacer avant la phase d’assemblage.
+
+2. STRUCTURES DE DONNEES
+   Permettre de définir des structures avec offsets automatiques.
+
+Exemple :
+
+struct vec3
+x
+y
+z
+end
+
+Résultat :
+
+vec3.x = 0
+vec3.y = 8
+vec3.z = 16
+
+Implémentation : ajouter des constantes dans la table des symboles.
+
+3. INCLUDE DE FICHIERS
+   Permettre de charger du code depuis d'autres fichiers.
+
+Exemple :
+
+include "math.asm"
+
+Implémentation : lire le fichier et injecter son contenu dans le flux de tokens.
+
+4. LABELS LOCAUX
+   Permettre de réutiliser des labels dans plusieurs fonctions.
+
+Exemple :
+
+.loop
+...
+jmp .loop
+
+Transformation interne possible :
+
+function1.loop
+function2.loop
+
+Implémentation : préfixer les labels locaux avec le dernier label global.
+
+5. DESASSEMBLEUR
+   Afficher l’instruction assembleur correspondant à un opcode.
+
+Exemple :
+
+0x01020304 -> add r1 r2 r3
+
+Implémentation : inverser la table instruction → opcode.
+
+6. GENERATION DE FICHIER BINAIRE
+   Au lieu d’afficher les instructions, écrire directement un fichier binaire.
+
+open("program.bin","wb")
+
+Cela permet de charger le programme dans un émulateur ou un CPU virtuel.
+
+7. LISTING ASSEMBLEUR
+   Afficher un mapping adresse / instruction / code machine.
+
+Exemple :
+
+0000  8A01   mov r1 r2
+0008  1F02   add r1 r3
+
+Cela permet de debugger plus facilement.
+
+8. BOUCLE DE GENERATION
+   Permettre de répéter du code automatiquement.
+
+Exemple :
+
+repeat 4
+add r1 r1 r1
+end
+
+Résultat :
+
+add r1 r1 r1
+add r1 r1 r1
+add r1 r1 r1
+add r1 r1 r1
