@@ -28,14 +28,15 @@ def instruction_table_init(tab: dict):
     tab["jge"] = 18 << 56
 
 
-def shunting_yard(toks: list[str]) -> int:
-    deck = []
+def shunting_yard(toks: list[str], vars: dict) -> int:
+    input = []
     value = {
-        "+": 1,
+        "+": 2,
         "-": 1,
-        "*": 2,
-        "/": 2,
-        "(": 3
+        "*": 3,
+        "/": 3,
+        "(": 0,
+        ")": 4
     }
     ops = {
         "+": lambda a, b: a + b,
@@ -43,40 +44,50 @@ def shunting_yard(toks: list[str]) -> int:
         "*": lambda a, b: a * b,
         "/": lambda a, b: a / b
     }
-    stack_op = []
-    stack_digit = []
+    holding_stack = []
+    solve_stack = []
+    output = []
     nbrs = []
+
     for tok in toks:
         nbrs.append([])
         char = 0
         while char < len(tok):
-            if tok[char] in "*/-+()":
-                deck.append(tok[char])
+            if tok in vars:
+                input.append(vars[tok])
+                break
+            elif tok[char] in "*/-+()":
+                input.append(tok[char])
                 char += 1
             else:
                 nbr = 0
                 while char < len(tok) and tok[char].isdigit():
                     nbr = nbr * 10 + int(tok[char])
                     char += 1
-                deck.append(nbr)
-    print(f"{deck=}")
+                input.append(nbr)
     i = 0
-    while i < len(deck):
-        if isinstance(deck[i], int):
-            stack_digit.append(deck[i])
+    while i < len(input):
+        if isinstance(input[i], int):
+            output.append(input[i])
+        elif input[i] == ")":
+            while holding_stack[-1] != "(":
+                output.append(holding_stack.pop())
+            holding_stack.pop()
         else:
-            if len(stack_op) > 0 and value[stack_op[-1]] > value[deck[i]]:
-                stack_digit[-1] = ops[deck[i]](
-                    stack_digit[-1], value[deck[i + 1]])
-            stack_op.append(deck[i])
+            while (holding_stack and value[holding_stack[-1]] > value[input[i]]
+                   and input[i] != "("):
+                output.append(holding_stack.pop())
+            holding_stack.append(input[i])
         i += 1
-        print(f"{stack_digit=} {stack_op=}")
-    while len(stack_digit) > 1:
-        a = stack_digit.pop()
-        b = stack_digit.pop()
-        stack_digit.append(ops[stack_op.pop()](a, b))
-    print(stack_digit)
-    return stack_digit[0]
+    while holding_stack:
+        output.append(holding_stack.pop())
+    while output:
+        while isinstance(output[0], int):
+            solve_stack.append(output.pop(0))
+        b = solve_stack.pop()
+        a = solve_stack.pop()
+        solve_stack.append(ops[output.pop(0)](a, b))
+    return int(solve_stack[0])
 
 
 def asm(executable: list):
@@ -102,13 +113,13 @@ def asm(executable: list):
             elif tokens[-1][0].startswith("var"):
                 if len(tokens[-1]) == 3:
                     vars[tokens[-1][1]] = int(tokens[-1][2][1:])
-                if len(tokens[-1]) > 3:
+                elif len(tokens[-1]) > 3:
                     raise ValueError("trop d'elements dans la def var")
                 else:
                     vars[tokens[-1][1]] = 0
             elif tokens[-1][0].startswith("const"):
                 if len(tokens[-1]) > 2:
-                    const[tokens[-1][1]] = shunting_yard(tokens[-1][2:])
+                    const[tokens[-1][1]] = shunting_yard(tokens[-1][2:], vars)
                 else:
                     raise ValueError("A ")
             else:
