@@ -53,8 +53,11 @@ def shunting_yard(toks: list[str], vars: dict) -> int:
         nbrs.append([])
         char = 0
         while char < len(tok):
-            if tok in vars:
-                input.append(vars[tok])
+            if tok in vars
+                try:
+                    input.append(int(vars[tok]))
+                except ValueError:
+                    exit(1)
                 break
             elif tok[char] in "*/-+()":
                 input.append(tok[char])
